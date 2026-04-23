@@ -54,7 +54,7 @@ int main() {
         cout << "Invalid input. Only letters and spaces are allowed.\n";
         return 0;
     }
- 
+
     if (choice == 1) {
         cout << "Ciphertext: " << caesar_encrypt(message, shift) << "\n";
     } else if (choice == 2) {

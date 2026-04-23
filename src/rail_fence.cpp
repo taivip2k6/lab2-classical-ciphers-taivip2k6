@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+ 
 using namespace std;
 
 bool is_valid_message(const string &text) {

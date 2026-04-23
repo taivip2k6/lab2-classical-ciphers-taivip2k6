@@ -23,7 +23,6 @@ string rail_fence_encrypt(const string &plaintext, int rails) {
     int direction = 1;
 
     for (char c : plaintext) {
-        // TODO(student): Q6 can keep spaces as normal characters.
         fence[rail] += c;
         rail += direction;
         if (rail == rails - 1 || rail == 0) direction = -direction;
@@ -35,12 +34,44 @@ string rail_fence_encrypt(const string &plaintext, int rails) {
 }
 
 string rail_fence_decrypt(const string &ciphertext, int rails) {
-    // TODO(student): Q5
-    return ciphertext;
+    if (rails <= 1 || ciphertext.empty()) return ciphertext;
+
+    int n = ciphertext.size();
+
+    vector<int> pattern(n);
+    int rail = 0, direction = 1;
+    for (int i = 0; i < n; i++) {
+        pattern[i] = rail;
+        rail += direction;
+        if (rail == rails - 1 || rail == 0) direction = -direction;
+    }
+
+    vector<int> rail_len(rails, 0);
+    for (int r : pattern) rail_len[r]++;
+
+    vector<string> fence(rails);
+    int idx = 0;
+    for (int r = 0; r < rails; r++) {
+        fence[r] = ciphertext.substr(idx, rail_len[r]);
+        idx += rail_len[r];
+    }
+
+    string plaintext(n, ' ');
+    vector<int> rail_idx(rails, 0);
+    for (int i = 0; i < n; i++) {
+        int r = pattern[i];
+        plaintext[i] = fence[r][rail_idx[r]++];
+    }
+
+    return plaintext;
 }
 
 string read_message_from_file(const string &path) {
     ifstream fin(path);
+    if (!fin.is_open()) {
+        cout << "Error: Cannot open file " << path << "\n";
+        return "";
+    }
     string line;
     getline(fin, line);
     return line;
@@ -59,14 +90,23 @@ int main() {
 
     if (choice == 3) {
         message = read_message_from_file("data/input.txt");
+        if (message.empty()) return 0;
         cout << "Message from file: " << message << "\n";
-    } else {
+    } else if (choice == 1 || choice == 2) {
         cout << "Enter message: ";
         getline(cin, message);
+    } else {
+        cout << "Invalid choice.\n";
+        return 0;
     }
 
     cout << "Enter rails: ";
     cin >> rails;
+
+    if (rails < 1) {
+        cout << "Invalid input. Rails must be >= 1.\n";
+        return 0;
+    }
 
     if (!is_valid_message(message)) {
         cout << "Invalid input. Only letters and spaces are allowed.\n";
@@ -77,8 +117,6 @@ int main() {
         cout << "Ciphertext: " << rail_fence_encrypt(message, rails) << "\n";
     } else if (choice == 2) {
         cout << "Plaintext: " << rail_fence_decrypt(message, rails) << "\n";
-    } else {
-        cout << "Invalid choice.\n";
     }
 
     return 0;
